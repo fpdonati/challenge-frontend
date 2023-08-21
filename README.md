@@ -1,6 +1,7 @@
 # To initialize app
 
-### `cd challenge-frontend`
 ### `npm install`
 ### `npm start`
+
+open your browser in http://localhost:3000
 
