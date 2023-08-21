@@ -1,15 +1,19 @@
 import React from "react";
 import { useCreatePostMutation } from "../api/apiSlice";
 
-const PostForm = () => {
+const PostForm = ({ localPosts, setLocalPosts }) => {
   const [createPost] = useCreatePostMutation();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const name = e.target.elements.name.value.trim();
     const description = e.target.elements.description.value.trim();
     if (name && description) {
-      createPost({ name, description });
+      const response = await createPost({ name, description });
+      if (response.data) {
+        // Si la creación del post fue exitosa, actualiza la lista local de posts
+        setLocalPosts([response.data, ...localPosts]);
+      }
     }
   };
 

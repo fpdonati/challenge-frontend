@@ -2,7 +2,9 @@ import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
 export const apiSlice = createApi({
   reducerPath: "api",
-  baseQuery: fetchBaseQuery({ baseUrl: "https://challenge-backend-04h1.onrender.com" }),
+  baseQuery: fetchBaseQuery({
+    baseUrl: "https://challenge-backend-04h1.onrender.com",
+  }),
   tagTypes: ["Posts"],
   endpoints: (builder) => ({
     getPosts: builder.query({
@@ -16,14 +18,12 @@ export const apiSlice = createApi({
         method: "POST",
         body: newPost,
       }),
-      invalidatesTags: ["Posts"],
     }),
     deletePost: builder.mutation({
       query: (postId) => ({
         url: `/posts/${postId}`,
         method: "DELETE",
       }),
-      invalidatesTags: ["Posts"],
     }),
   }),
 });

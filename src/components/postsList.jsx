@@ -1,13 +1,30 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useDeletePostMutation, useGetPostsQuery } from "../api/apiSlice";
+import PostForm from "./postForm";
 
 const PostsList = () => {
   const { data: posts, isLoading, isError, error } = useGetPostsQuery();
   const [deletePost] = useDeletePostMutation();
   const [searchTerm, setSearchTerm] = useState("");
+  const [localPosts, setLocalPosts] = useState([]);
+
+  useEffect(() => {
+    if (posts) {
+      setLocalPosts(posts);
+    }
+  }, [posts]);
 
   const handleChange = (e) => {
     setSearchTerm(e.target.value);
+  };
+
+  const handleDelete = async (postId) => {
+    try {
+      await deletePost(postId);
+      setLocalPosts(localPosts.filter((post) => post.id !== postId));
+    } catch (error) {
+      console.error("Error deleting post:", error);
+    }
   };
 
   const handleSubmit = (e) => {
@@ -16,12 +33,6 @@ const PostsList = () => {
 
   if (isLoading) return <div>Loading...</div>;
   else if (isError) return <div>Error: {error.message}</div>;
-
-  const filteredPosts = posts.filter(
-    (post) =>
-      post.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      post.description.toLowerCase().includes(searchTerm.toLowerCase())
-  );
 
   return (
     <div className="w-full">
@@ -45,23 +56,35 @@ const PostsList = () => {
       </div>
 
       <div className="flex flex-col">
-        {filteredPosts.map((post) => (
-          <div className="bg-neutral-800 p-4 rounded-md my-0.5" key={post.id}>
-            <div className="flex justify-between align-center">
-              <p className="basis-1/3 break-all px-2">{post.name}</p>
-              <p className="basis-1/3 break-all px-2">{post.description}</p>
-              <div className="basis-1/3 flex justify-center">
-                <button
-                  onClick={() => deletePost(post.id)}
-                  className="bg-red-500 px-2 py-1 text-xs rounded-md h-6"
-                >
-                  delete
-                </button>
+        {localPosts
+          .filter((post) => {
+            const searchTermLower = searchTerm.toLowerCase();
+            return (
+              post.name.toLowerCase().includes(searchTermLower) ||
+              post.description.toLowerCase().includes(searchTermLower)
+            );
+          })
+          .map((post) => (
+            <div className="bg-neutral-800 p-4 rounded-md my-0.5" key={post.id}>
+              <div className="flex justify-between align-center">
+                <p className="basis-1/3 break-all px-2">{post.name}</p>
+                <p className="basis-1/3 break-all px-2">{post.description}</p>
+                <div className="basis-1/3 flex justify-center">
+                  <button
+                    onClick={() => handleDelete(post.id)}
+                    className="bg-red-500 px-2 py-1 text-xs rounded-md h-6"
+                  >
+                    delete
+                  </button>
+                </div>
               </div>
             </div>
-          </div>
-        ))}
+          ))}
       </div>
+      <PostForm
+        localPosts={localPosts} // Pasa la lista de posts al componente PostForm
+        setLocalPosts={setLocalPosts} // Pasa la función para actualizar la lista de posts
+      />
     </div>
   );
 };
